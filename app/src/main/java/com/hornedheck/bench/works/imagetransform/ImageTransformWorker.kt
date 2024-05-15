@@ -11,31 +11,21 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
 
-private const val BATCH_SIZE = 4
-private const val BATCH_COUNT = 10
-private val scales = List(BATCH_COUNT) {
-    1.0 / (BATCH_COUNT + 1) * (it + 1)
-}
 
-class ImageTransformWorker : Worker {
+class ImageTransformWorker : Worker() {
 
-    override fun run(context: Context): WorkerResult {
-        val times = List(BATCH_COUNT) { batchNum ->
-            measureTimeMillis {
-                repeat(BATCH_SIZE) { i ->
-                    resizeBitmapMultithreaded(
-                        loadImage(context, getImageFilename(batchNum, i)),
-                        8,
-                        scales[i]
-                    )
-                }
-            }
-        }
-        return WorkerResult(
-            BATCH_COUNT,
-            BATCH_SIZE,
-            totalTimeMs = times.sum(),
-            timesMs = times
+    override val batchCount: Int = 10
+    override val batchSize: Int = 4
+    private val scales = List(batchCount) {
+        1.0 / (batchCount + 1) * (it + 1)
+    }
+
+
+    override fun run(context: Context, batchNum: Int, i: Int) {
+        resizeBitmapMultithreaded(
+            loadImage(context, getImageFilename(batchNum, i)),
+            8,
+            scales[i]
         )
     }
 

@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.hornedheck.bench.ui.theme.BenchTheme
+import com.hornedheck.bench.works.encyption.EncryptDecryptWorker
 import com.hornedheck.bench.works.imagetransform.ImageTransformWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,16 +37,16 @@ class MainActivity : ComponentActivity() {
 
 
         CoroutineScope(Dispatchers.Default).launch {
-            val imageWorker = ImageTransformWorker()
-            Log.v(TAG, "Starting ImageTransformWorker.")
-            val imageResult = imageWorker.run(this@MainActivity)
+            val worker = EncryptDecryptWorker()
+            Log.v(TAG, "Starting ${worker.javaClass.name.substringAfterLast('.')}.")
+            val result = worker.run(this@MainActivity)
             Log.v(TAG, StringBuilder().append(
                 "ImageTransformWorker finished:\n",
-                "Batches: ${imageResult.batchCount}\n",
-                "Batch size: ${imageResult.batchSize}\n",
-                "Total time: ${imageResult.totalTimeMs} ms\n",
+                "Batches: ${result.batchCount}\n",
+                "Batch size: ${result.batchSize}\n",
+                "Total time: ${result.totalTimeMs} ms\n",
                 "Per batch times:\n",
-                imageResult.timesMs.mapIndexed { b, v ->
+                result.timesMs.mapIndexed { b, v ->
                     "\tBatch $b: $v ms"
                 }.joinToString(separator = "\n") { it }
             ).toString())
