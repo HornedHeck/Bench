@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.hornedheck.bench.ui.theme.BenchTheme
 import com.hornedheck.bench.works.encyption.EncryptDecryptWorker
 import com.hornedheck.bench.works.imagetransform.ImageTransformWorker
+import com.hornedheck.bench.works.inflate.InflateWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,11 +38,11 @@ class MainActivity : ComponentActivity() {
 
 
         CoroutineScope(Dispatchers.Default).launch {
-            val worker = EncryptDecryptWorker()
+            val worker = InflateWorker()
             Log.v(TAG, "Starting ${worker.javaClass.name.substringAfterLast('.')}.")
             val result = worker.run(this@MainActivity)
             Log.v(TAG, StringBuilder().append(
-                "ImageTransformWorker finished:\n",
+                "${worker::class.simpleName} finished:\n",
                 "Batches: ${result.batchCount}\n",
                 "Batch size: ${result.batchSize}\n",
                 "Total time: ${result.totalTimeMs} ms\n",
