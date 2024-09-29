@@ -20,4 +20,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Bench"
+include(":common")
 include(":app")
+include(":app:benchmark")

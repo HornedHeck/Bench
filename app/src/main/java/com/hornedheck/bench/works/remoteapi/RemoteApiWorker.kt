@@ -14,7 +14,7 @@ import kotlin.coroutines.CoroutineContext
 class RemoteApiWorker : Worker() {
 
     override val batchCount: Int
-        get() = 10
+        get() = 1
     override val batchSize: Int
         get() = 1
 

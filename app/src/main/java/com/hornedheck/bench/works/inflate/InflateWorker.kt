@@ -8,7 +8,7 @@ import com.hornedheck.bench.works.Worker
 class InflateWorker : Worker() {
 
     override val batchCount: Int
-        get() = 10
+        get() = 1
     override val batchSize: Int
         get() = 5
 

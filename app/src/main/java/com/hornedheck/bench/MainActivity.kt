@@ -1,29 +1,29 @@
 package com.hornedheck.bench
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.hornedheck.bench.ui.theme.BenchTheme
-import com.hornedheck.bench.works.encyption.EncryptDecryptWorker
-import com.hornedheck.bench.works.imagetransform.ImageTransformWorker
-import com.hornedheck.bench.works.inflate.InflateWorker
-import com.hornedheck.bench.works.mapping.MapperWorker
-import com.hornedheck.bench.works.remoteapi.RemoteApiWorker
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-
-private const val TAG = "TIME"
+import com.hornedheck.bench.works.State
+import com.hornedheck.common.BENCHMARK_TYPE_KEY
+import com.hornedheck.common.BenchmarkType
 
 class MainActivity : ComponentActivity() {
+
+    private val viewModel by viewModels<MainActivityViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -33,42 +33,56 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    when (val state = viewModel.state.collectAsState().value) {
+                        State.Ready -> ReadyState()
+                        is State.Progress -> RunningState(name = state.workerName)
+                        is State.Results -> ResultsState(runResults = state)
+                    }
                 }
             }
         }
+    }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.startBenchmarks(
+            BenchmarkType.valueOf(
+                intent.getStringExtra(BENCHMARK_TYPE_KEY)!!
+            ),
+            application
+        )
+    }
 
-        CoroutineScope(Dispatchers.Default).launch {
-            val worker = MapperWorker()
-            Log.v(TAG, "Starting ${worker.javaClass.name.substringAfterLast('.')}.")
-            val result = worker.run(this@MainActivity)
-            Log.v(TAG, StringBuilder().append(
-                "${worker::class.simpleName} finished:\n",
-                "Batches: ${result.batchCount}\n",
-                "Batch size: ${result.batchSize}\n",
-                "Total time: ${result.totalTimeMs} ms\n",
-                "Per batch times:\n",
-                result.timesMs.mapIndexed { b, v ->
-                    "\tBatch $b: $v ms"
-                }.joinToString(separator = "\n") { it }
-            ).toString())
-        }
+}
+
+@Composable
+fun ReadyState() {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Ready to Rock'n'roll")
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun RunningState(name: String) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator()
+        Text(text = "Running $name")
+    }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    BenchTheme {
-        Greeting("Android")
+fun ResultsState(runResults: State.Results) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Finished")
+        Text(text = runResults.runResult)
     }
 }

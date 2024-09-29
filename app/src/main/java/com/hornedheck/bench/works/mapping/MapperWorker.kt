@@ -17,7 +17,7 @@ class MapperWorker : Worker() {
     private val hotelDetailsMapper = HotelDetailMapperImpl(roomMapper)
 
     override val batchCount: Int
-        get() = 10
+        get() = 1
     override val batchSize: Int
         get() = 5
 

@@ -14,15 +14,16 @@ import kotlin.system.measureTimeMillis
 
 class ImageTransformWorker : Worker() {
 
-    override val batchCount: Int = 10
+    override val batchCount: Int = 1
     override val batchSize: Int = 4
-    private val scales = List(batchCount) {
-        1.0 / (batchCount + 1) * (it + 1)
+    private val scales = List(batchSize) {
+        1.0 / (batchSize + 1) * (it + 1)
     }
 
 
     override fun run(context: Context, batchNum: Int, i: Int) {
         resizeBitmapMultithreaded(
+
             loadImage(context, getImageFilename(batchNum, i)),
             8,
             scales[i]
