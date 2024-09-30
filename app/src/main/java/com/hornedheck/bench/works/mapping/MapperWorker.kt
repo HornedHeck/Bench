@@ -16,19 +16,16 @@ class MapperWorker : Worker() {
     private val roomMapper = RoomMapperImpl(priceDetailsMapper)
     private val hotelDetailsMapper = HotelDetailMapperImpl(roomMapper)
 
-    override val batchCount: Int
-        get() = 1
     override val batchSize: Int
         get() = 5
 
-    override fun run(context: Context, batchNum: Int, i: Int) {
-        prepare(context)
+    override fun run(context: Context, i: Int) {
         dataToParse.map {
             hotelsMapper.map(it) to it.hotels?.map { hotel -> hotelDetailsMapper.map(hotel) }
         }
     }
 
-    private fun prepare(context: Context) {
+    override fun prepare(context: Context) {
         val gson = GsonBuilder().create()
         val src = context.assets.open("hotels.json").reader().readText()
         dataToParse = gson.fromJson(src, Array<HotelsResponse>::class.java).asList()

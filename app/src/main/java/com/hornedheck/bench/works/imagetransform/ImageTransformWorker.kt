@@ -14,17 +14,15 @@ import kotlin.system.measureTimeMillis
 
 class ImageTransformWorker : Worker() {
 
-    override val batchCount: Int = 1
     override val batchSize: Int = 4
     private val scales = List(batchSize) {
         1.0 / (batchSize + 1) * (it + 1)
     }
 
 
-    override fun run(context: Context, batchNum: Int, i: Int) {
+    override fun run(context: Context, i: Int) {
         resizeBitmapMultithreaded(
-
-            loadImage(context, getImageFilename(batchNum, i)),
+            loadImage(context, getImageFilename(i)),
             8,
             scales[i]
         )
@@ -36,8 +34,8 @@ class ImageTransformWorker : Worker() {
         }
     }
 
-    private fun getImageFilename(batchNum: Int, iterationNum: Int): String {
-        val imgNumber = (batchNum + 1) * (iterationNum + 1) % 4
+    private fun getImageFilename( iterationNum: Int): String {
+        val imgNumber = (iterationNum + 1) % 4
         return "images/$imgNumber.heic"
     }
 

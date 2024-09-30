@@ -11,43 +11,39 @@ import com.hornedheck.common.EXECUTION_TIME_TAG
 import kotlin.system.measureTimeMillis
 
 data class WorkerResult(
-    val batchCount: Int,
     val batchSize: Int,
-    val totalTimeMs: Long,
-    val timesMs: List<Long>
+    val time : Long
 )
 
 abstract class Worker {
 
-    protected abstract val batchCount: Int
     protected abstract val batchSize: Int
 
-    fun run(context: Context): WorkerResult {
-        val batteryManager = context.getSystemService(BatteryManager::class.java)
+    protected open fun prepare(context: Context){}
 
-        val times = List(batchCount) { batchNum ->
-            val batteryStart = batteryManager.getLongProperty(BATTERY_PROPERTY_ENERGY_COUNTER)
-            var totalTimeMs = 0L
-            repeat(batchSize) { i ->
-                val time = measureTimeMillis {
-                    run(context, batchNum, i)
-                }
-                Trace.setCounter(EXECUTION_TIME_TAG, time)
-                totalTimeMs += time
+    fun run(context: Context): WorkerResult {
+        prepare(context)
+//        val batteryManager = context.getSystemService(BatteryManager::class.java)
+//
+//        val batteryStart = batteryManager.getLongProperty(BATTERY_PROPERTY_ENERGY_COUNTER)
+        var totalTimeMs = 0L
+        repeat(batchSize) { i ->
+            val time = measureTimeMillis {
+                run(context, i)
             }
-            val batteryEnd = batteryManager.getLongProperty(BATTERY_PROPERTY_ENERGY_COUNTER)
-            Trace.setCounter(BATTERY_START, batteryStart)
-            Trace.setCounter(BATTERY_END, batteryEnd)
-            Trace.setCounter(BATTERY_DELTA, batteryStart - batteryEnd)
-            totalTimeMs
+            Trace.setCounter(EXECUTION_TIME_TAG, time)
+            totalTimeMs += time
         }
+//        val batteryEnd = batteryManager.getLongProperty(BATTERY_PROPERTY_ENERGY_COUNTER)
+//        Trace.setCounter(BATTERY_START, batteryStart)
+//        Trace.setCounter(BATTERY_END, batteryEnd)
+//        Trace.setCounter(BATTERY_DELTA, batteryStart - batteryEnd)
+
         return WorkerResult(
-            batchCount,
             batchSize,
-            totalTimeMs = times.sum(),
-            timesMs = times
+            totalTimeMs
         )
     }
 
-    protected abstract fun run(context: Context, batchNum: Int, i: Int)
+    protected abstract fun run(context: Context, i: Int)
 }

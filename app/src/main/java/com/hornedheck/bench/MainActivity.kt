@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModelProvider
 import com.hornedheck.bench.ui.theme.BenchTheme
 import com.hornedheck.bench.works.State
 import com.hornedheck.common.BENCHMARK_TYPE_KEY
@@ -22,7 +23,9 @@ import com.hornedheck.common.BenchmarkType
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel by viewModels<MainActivityViewModel>()
+    private val viewModel by viewModels<MainActivityViewModel>(
+        factoryProducer = { ViewModelProvider.AndroidViewModelFactory(application) }
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +50,7 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         viewModel.startBenchmarks(
             BenchmarkType.valueOf(
-                intent.getStringExtra(BENCHMARK_TYPE_KEY)!!
+                intent.getStringExtra(BENCHMARK_TYPE_KEY) ?: BenchmarkType.DB.name
             ),
             application
         )

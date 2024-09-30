@@ -6,15 +6,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import kotlin.coroutines.CoroutineContext
 
 class RemoteApiWorker : Worker() {
 
-    override val batchCount: Int
-        get() = 1
     override val batchSize: Int
         get() = 1
 
@@ -28,7 +24,7 @@ class RemoteApiWorker : Worker() {
         .build()
         .create(DogsApi::class.java)
 
-    override fun run(context: Context, batchNum: Int, i: Int) {
+    override fun run(context: Context, i: Int) {
         runBlocking {
             withContext(Dispatchers.IO) {
                 val breeds = api.getAllBreeds()

@@ -4,5 +4,6 @@ enum class BenchmarkType{
     IMAGE_TRANSFORM,
     ENCRYPTION,
     MAPPER,
-    REMOTE_API
+    REMOTE_API,
+    DB
 }

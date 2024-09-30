@@ -9,7 +9,7 @@ import androidx.benchmark.perfetto.PerfettoTraceProcessor
 
 class CounterMetric(private val counterName: String) : TraceMetric() {
 
-    override fun getResult(
+    override fun getMeasurements(
         captureInfo: CaptureInfo,
         traceSession: PerfettoTraceProcessor.Session
     ): List<Measurement> {
