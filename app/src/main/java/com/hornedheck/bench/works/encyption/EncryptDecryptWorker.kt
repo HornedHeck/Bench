@@ -16,10 +16,15 @@ class EncryptDecryptWorker : Worker() {
             it.generateKey()
         }
 
-    override val batchSize = 5
+    override val batchSize = 50
+
+    private lateinit var src : String
+
+    override fun prepare(context: Context) {
+        src = getSrc(context)
+    }
 
     override fun run(context: Context, batchIteration: Int, iteration : Int) {
-        val src = getSrc(context)
         val (encrypted, iv) = encrypt(src)
         decrypt(encrypted, iv)
     }
