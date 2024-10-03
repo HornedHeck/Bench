@@ -16,6 +16,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bench"
         tools:targetApi="31">
+        <activity
+            android:name=".circles.CirclesActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <profileable
             android:shell="true"
             tools:targetApi="29" />

@@ -21,11 +21,17 @@ class MainActivityViewModel(context: Application) : AndroidViewModel(context) {
     private val _state = MutableStateFlow<State>(State.Ready)
     val state: StateFlow<State> = _state
 
-    fun startBenchmarks(benchmarkType: BenchmarkType, context: Context, iteration: Int) {
+    fun startBenchmarks(
+        benchmarkType: BenchmarkType,
+        context: Context,
+        iteration: Int,
+        expectedTime : Int
+    ) {
+
         viewModelScope.launch(
             Dispatchers.Default
         ) {
-            val worker = getWorker(benchmarkType)
+            val worker = getWorker(benchmarkType, expectedTime)
             _state.value = State.Progress(worker::class.simpleName ?: "UnknownWorker")
             val result = worker.run(context, false, iteration)
             _state.value = State.Results(
@@ -39,11 +45,12 @@ class MainActivityViewModel(context: Application) : AndroidViewModel(context) {
 
     }
 
-    private fun getWorker(type: BenchmarkType) = when (type) {
+    private fun getWorker(type: BenchmarkType, timeToRun : Int) = when (type) {
         BenchmarkType.IMAGE_TRANSFORM -> ImageTransformWorker()
         BenchmarkType.ENCRYPTION -> EncryptDecryptWorker()
         BenchmarkType.MAPPER -> MapperWorker()
         BenchmarkType.REMOTE_API -> RemoteApiWorker()
-        BenchmarkType.DB -> DBWorker(1 * 10 * 1000L, getApplication())
+        BenchmarkType.DB -> DBWorker(timeToRun.toLong(), getApplication())
+        else -> throw Exception()
     }
 }

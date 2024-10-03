@@ -5,5 +5,6 @@ enum class BenchmarkType{
     ENCRYPTION,
     MAPPER,
     REMOTE_API,
-    DB
+    DB,
+    COMPOSE
 }

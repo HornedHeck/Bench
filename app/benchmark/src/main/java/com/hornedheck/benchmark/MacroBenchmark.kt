@@ -1,8 +1,11 @@
 package com.hornedheck.benchmark
 
+import android.content.Intent
 import androidx.benchmark.macro.CompilationMode
 import androidx.benchmark.macro.ExperimentalMetricApi
+import androidx.benchmark.macro.FrameTimingMetric
 import androidx.benchmark.macro.MemoryUsageMetric
+import androidx.benchmark.macro.Metric
 import androidx.benchmark.macro.StartupMode
 import androidx.benchmark.macro.StartupTimingMetric
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
@@ -81,7 +84,7 @@ class MacroBenchmark {
     fun parametrized() {
         val args = InstrumentationRegistry.getArguments()
         val testType = BenchmarkType.valueOf(args.getString("type")!!)
-        val executionTime = args.getLong("execution_time", 30_000L)
+        val executionTime = args.getLong("execution_time", 10_000L)
         val compilationMode = processCompilationMode(args.getString("compilation_mode")!!)
 
         benchmarkRule.measureRepeated(
@@ -92,21 +95,37 @@ class MacroBenchmark {
                 CounterSumMetric(ITERATIONS_TAG),
                 CounterMetric(STEP_TIME_TAG, EXECUTION_TIME_TAG),
                 StartupTimingMetric()
-            ),
+            ).frameMetrics(testType),
             iterations = 10,
             startupMode = StartupMode.COLD,
             compilationMode = compilationMode
         ) {
             pressHome()
-            startActivityAndWait {
-                it.putExtra(BENCHMARK_TYPE_KEY, testType.name)
-                it.putExtra(EXECUTION_TIME_KEY, executionTime)
-                it.putExtra(ITERATION_KEY, this.iteration)
-            }
+            startActivityAndWait(
+                Intent()
+                    .setClassName(packageName, getActivityName(testType))
+                    .putExtra(BENCHMARK_TYPE_KEY, testType.name)
+                    .putExtra(EXECUTION_TIME_KEY, executionTime)
+                    .putExtra(ITERATION_KEY, this.iteration)
+            )
             this.device.findObject(UiSelector().text("Finished")).waitForExists(600000)
         }
 
 
+    }
+
+    private fun List<Metric>.frameMetrics(testType: BenchmarkType) =
+        if (testType == BenchmarkType.COMPOSE) {
+            this + listOf(
+                FrameTimingMetric()
+            )
+        } else {
+            this
+        }
+
+    private fun getActivityName(testType: BenchmarkType) = when (testType) {
+        BenchmarkType.COMPOSE -> ".circles.CirclesActivity"
+        else -> ".MainActivity"
     }
 
     private fun processCompilationMode(arg: String) = when (arg) {

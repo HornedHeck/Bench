@@ -2,7 +2,7 @@ package com.hornedheck.bench.works
 
 sealed class State {
 
-    object Ready : State()
+    data object Ready : State()
 
     class Progress(
         val workerName : String

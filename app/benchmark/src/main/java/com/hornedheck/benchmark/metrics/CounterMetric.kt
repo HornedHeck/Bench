@@ -28,7 +28,9 @@ open class CounterMetric(
 
         val values = counterValues.map {
             it.double("value")
-        }.toList()
+        }.toList().ifEmpty {
+            listOf(0.0)
+        }
 
         return when (val result = resultConverter(values)) {
             is MeasurementResult.Single -> {

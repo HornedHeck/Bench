@@ -2,7 +2,7 @@
 
 set -e
 #test_type=$1
-test_type="IMAGE_TRANSFORM"
+test_type="COMPOSE"
 #compilation_types=("Interpret")
 compilation_types=("AOT" "JIT" "Default" "Interpret")
 
@@ -65,6 +65,7 @@ do
     -e class com.hornedheck.benchmark.MacroBenchmark#parametrized \
     -e type $test_type \
     -e compilation_mode $compilation_type \
+    -e execution_time 10000 \
     -e "androidx.benchmark.suppressErrors" "EMULATOR,DEBUGGABLE" \
     -e "androidx.benchmark.enabledRules" "baselineprofile,macrobenchmark" \
     com.hornedheck.benchmark/androidx.test.runner.AndroidJUnitRunner
