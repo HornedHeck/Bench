@@ -20,6 +20,7 @@ import com.hornedheck.bench.ui.theme.BenchTheme
 import com.hornedheck.bench.works.State
 import com.hornedheck.common.BENCHMARK_TYPE_KEY
 import com.hornedheck.common.BenchmarkType
+import com.hornedheck.common.ITERATION_KEY
 
 class MainActivity : ComponentActivity() {
 
@@ -50,9 +51,10 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         viewModel.startBenchmarks(
             BenchmarkType.valueOf(
-                intent.getStringExtra(BENCHMARK_TYPE_KEY) ?: BenchmarkType.DB.name
+                intent.getStringExtra(BENCHMARK_TYPE_KEY) ?: BenchmarkType.IMAGE_TRANSFORM.name
             ),
-            application
+            application,
+            intent.getIntExtra(ITERATION_KEY, 0)
         )
     }
 

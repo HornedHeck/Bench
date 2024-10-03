@@ -22,7 +22,7 @@ abstract class FixedTimeWorker(private val timeToRun: Long) : Worker() {
 
     protected abstract suspend fun runBatch(context: Context)
 
-    final override fun run(context: Context, i: Int) {
+    final override fun run(context: Context, batchIteration: Int, iteration: Int) {
         var counter = 0L
         val task = CoroutineScope(this.context + CoroutineExceptionHandler { _, throwable ->
             if (throwable !is CancellationException) {

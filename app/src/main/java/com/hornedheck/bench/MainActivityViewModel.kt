@@ -2,9 +2,7 @@ package com.hornedheck.bench
 
 import android.app.Application
 import android.content.Context
-import android.os.Parcelable
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hornedheck.bench.works.State
 import com.hornedheck.bench.works.db.DBWorker
@@ -23,13 +21,13 @@ class MainActivityViewModel(context: Application) : AndroidViewModel(context) {
     private val _state = MutableStateFlow<State>(State.Ready)
     val state: StateFlow<State> = _state
 
-    fun startBenchmarks(benchmarkType: BenchmarkType, context: Context) {
+    fun startBenchmarks(benchmarkType: BenchmarkType, context: Context, iteration: Int) {
         viewModelScope.launch(
             Dispatchers.Default
         ) {
             val worker = getWorker(benchmarkType)
             _state.value = State.Progress(worker::class.simpleName ?: "UnknownWorker")
-            val result = worker.run(context)
+            val result = worker.run(context, false, iteration)
             _state.value = State.Results(
                 runResult = """
                     ${worker::class.simpleName}
@@ -46,6 +44,6 @@ class MainActivityViewModel(context: Application) : AndroidViewModel(context) {
         BenchmarkType.ENCRYPTION -> EncryptDecryptWorker()
         BenchmarkType.MAPPER -> MapperWorker()
         BenchmarkType.REMOTE_API -> RemoteApiWorker()
-        BenchmarkType.DB -> DBWorker(1 * 10 * 1000L , getApplication())
+        BenchmarkType.DB -> DBWorker(1 * 10 * 1000L, getApplication())
     }
 }

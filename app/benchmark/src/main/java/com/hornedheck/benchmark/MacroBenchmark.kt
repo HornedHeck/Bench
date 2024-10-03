@@ -10,11 +10,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiSelector
 import com.hornedheck.benchmark.metrics.CounterMetric
+import com.hornedheck.benchmark.metrics.CounterSumMetric
 import com.hornedheck.common.BENCHMARK_TYPE_KEY
 import com.hornedheck.common.BenchmarkType
 import com.hornedheck.common.EXECUTION_TIME_KEY
 import com.hornedheck.common.EXECUTION_TIME_TAG
 import com.hornedheck.common.ITERATIONS_TAG
+import com.hornedheck.common.ITERATION_KEY
+import com.hornedheck.common.STEP_TIME_TAG
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,7 +33,8 @@ class MacroBenchmark {
         packageName = "com.hornedheck.bench",
         metrics = listOf(
             MemoryUsageMetric(MemoryUsageMetric.Mode.Last),
-            CounterMetric(EXECUTION_TIME_TAG),
+            CounterSumMetric(EXECUTION_TIME_TAG),
+            CounterMetric(STEP_TIME_TAG, EXECUTION_TIME_TAG),
             StartupTimingMetric()
 //            CounterMetric(BATTERY_START),
 //            CounterMetric(BATTERY_END),
@@ -53,8 +57,8 @@ class MacroBenchmark {
         packageName = "com.hornedheck.bench",
         metrics = listOf(
             MemoryUsageMetric(MemoryUsageMetric.Mode.Last),
-            CounterMetric(EXECUTION_TIME_TAG),
-            CounterMetric(ITERATIONS_TAG),
+            CounterSumMetric(EXECUTION_TIME_TAG),
+            CounterSumMetric(ITERATIONS_TAG),
             StartupTimingMetric()
 //            CounterMetric(BATTERY_START),
 //            CounterMetric(BATTERY_END),
@@ -63,7 +67,7 @@ class MacroBenchmark {
         ),
         iterations = 10,
         startupMode = StartupMode.WARM,
-        compilationMode = CompilationMode.Full()
+        compilationMode = CompilationMode.Partial()
     ) {
         pressHome()
         startActivityAndWait {
@@ -73,4 +77,45 @@ class MacroBenchmark {
         this.device.findObject(UiSelector().text("Finished")).waitForExists(300000)
     }
 
+    @Test
+    fun parametrized() {
+        val args = InstrumentationRegistry.getArguments()
+        val testType = BenchmarkType.valueOf(args.getString("type")!!)
+        val executionTime = args.getLong("execution_time", 30_000L)
+        val compilationMode = processCompilationMode(args.getString("compilation_mode")!!)
+
+        benchmarkRule.measureRepeated(
+            packageName = "com.hornedheck.bench",
+            metrics = listOf(
+                MemoryUsageMetric(MemoryUsageMetric.Mode.Last),
+                CounterSumMetric(EXECUTION_TIME_TAG),
+                CounterSumMetric(ITERATIONS_TAG),
+                CounterMetric(STEP_TIME_TAG, EXECUTION_TIME_TAG),
+                StartupTimingMetric()
+            ),
+            iterations = 10,
+            startupMode = StartupMode.COLD,
+            compilationMode = compilationMode
+        ) {
+            pressHome()
+            startActivityAndWait {
+                it.putExtra(BENCHMARK_TYPE_KEY, testType.name)
+                it.putExtra(EXECUTION_TIME_KEY, executionTime)
+                it.putExtra(ITERATION_KEY, this.iteration)
+            }
+            this.device.findObject(UiSelector().text("Finished")).waitForExists(600000)
+        }
+
+
+    }
+
+    private fun processCompilationMode(arg: String) = when (arg) {
+        "JIT" -> CompilationMode.None()
+        "AOT" -> CompilationMode.Full()
+        "Interpret" -> CompilationMode.Interpreted
+        "Default" -> CompilationMode.Partial()
+        else -> {
+            throw Exception("Incorrect compilation mode. Correct values: JIT, AOT, Interpret, Default")
+        }
+    }
 }

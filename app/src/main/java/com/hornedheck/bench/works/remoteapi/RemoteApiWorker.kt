@@ -24,7 +24,7 @@ class RemoteApiWorker : Worker() {
         .build()
         .create(DogsApi::class.java)
 
-    override fun run(context: Context, i: Int) {
+    override fun run(context: Context, batchIteration: Int, iteration : Int) {
         runBlocking {
             withContext(Dispatchers.IO) {
                 val breeds = api.getAllBreeds()

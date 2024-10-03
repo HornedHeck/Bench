@@ -4,27 +4,25 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.hornedheck.bench.works.Worker
-import com.hornedheck.bench.works.WorkerResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
-import kotlin.system.measureTimeMillis
 
 
 class ImageTransformWorker : Worker() {
 
-    override val batchSize: Int = 4
-    private val scales = List(batchSize) {
-        1.0 / (batchSize + 1) * (it + 1)
+    override val batchSize: Int = 10
+
+    private fun getScale(iteration: Int): Double {
+        return (iteration + 1).toDouble() / 10 + 0.5
     }
 
-
-    override fun run(context: Context, i: Int) {
+    override fun run(context: Context, batchIteration: Int, iteration: Int) {
         resizeBitmapMultithreaded(
-            loadImage(context, getImageFilename(i)),
+            loadImage(context, getImageFilename(iteration)),
             8,
-            scales[i]
+            getScale(iteration)
         )
     }
 
@@ -34,9 +32,8 @@ class ImageTransformWorker : Worker() {
         }
     }
 
-    private fun getImageFilename( iterationNum: Int): String {
-        val imgNumber = (iterationNum + 1) % 4
-        return "images/$imgNumber.heic"
+    private fun getImageFilename(iterationNum: Int): String {
+        return "images/0.heic"
     }
 
     private fun resizeBitmapMultithreaded(

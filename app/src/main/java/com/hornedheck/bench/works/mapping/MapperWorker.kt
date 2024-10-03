@@ -19,7 +19,7 @@ class MapperWorker : Worker() {
     override val batchSize: Int
         get() = 5
 
-    override fun run(context: Context, i: Int) {
+    override fun run(context: Context, batchIteration: Int, iteration : Int) {
         dataToParse.map {
             hotelsMapper.map(it) to it.hotels?.map { hotel -> hotelDetailsMapper.map(hotel) }
         }

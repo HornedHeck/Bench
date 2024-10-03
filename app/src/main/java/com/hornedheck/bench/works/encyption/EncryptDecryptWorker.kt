@@ -18,7 +18,7 @@ class EncryptDecryptWorker : Worker() {
 
     override val batchSize = 5
 
-    override fun run(context: Context, i: Int) {
+    override fun run(context: Context, batchIteration: Int, iteration : Int) {
         val src = getSrc(context)
         val (encrypted, iv) = encrypt(src)
         decrypt(encrypted, iv)
